@@ -19,7 +19,7 @@ require('lazy').setup({
   -- Git related plugins
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
-
+  'ThePrimeagen/vim-be-good',
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
@@ -104,11 +104,14 @@ require('lazy').setup({
     -- See `:help lualine.txt`
     opts = {
       options = {
-        icons_enabled = false,
-        theme = 'onedark',
+        icons_enabled = true,
+        theme = 'catppuccin',
         component_separators = '|',
         section_separators = '',
       },
+      sections = {
+        lualine_c = {{ 'filename', path = 1 }}
+      }
     },
   },
 
@@ -154,6 +157,28 @@ require('lazy').setup({
     event = "InsertEnter",
     opts = {} -- this is equalent to setup({}) function
   },
+  {
+    -- java lsp
+    'mfussenegger/nvim-jdtls'
+  },
+  {
+    -- Better navigation with tmux
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateDown",
+      "TmuxNavigateUp",
+      "TmuxNavigateRight",
+      "TmuxNavigatePrevious",
+    },
+    keys = {
+      { "<C-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+      { "<C-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+      { "<C-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+      { "<C-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+      { "<C-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    },
+  },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -168,6 +193,8 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
 }, {})
+
+vim.opt.list = true
 
 -- Set highlight on search
 vim.o.hlsearch = false
@@ -212,6 +239,14 @@ vim.opt.number = true
 vim.opt.cursorline = true
 vim.opt.cursorcolumn = true
 vim.opt.relativenumber = true
+vim.opt.swapfile = false
+
+vim.keymap.set('n', '<C-u>', '<C-u>zz')
+vim.keymap.set('n', '<C-d>', '<C-d>zz')
+vim.keymap.set('n', 'n', 'nzz')
+vim.keymap.set('n', 'N', 'Nzz')
+vim.keymap.set('n', '*', '*zz')
+vim.keymap.set('n', '#', '#zz')
 
 vim.cmd.colorscheme "catppuccin"
 
@@ -439,13 +474,50 @@ require('which-key').register {
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
-require('mason').setup()
+require('mason').setup {
+  -- log_level = vim.log.levels.DEBUG
+}
 require('mason-lspconfig').setup()
 
+-- local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
+-- local workspace_dir = '/home/ellado/workspace/' .. project_name
+ require'lspconfig'.rust_analyzer.setup{
+   settings = {
+     ['rust-analyzer'] = {
+       diagnostics = {
+         enable = false;
+       }
+     }
+   }
+ }
 local servers = {
-  gopls = {},
-  pyright = {},
-  rust_analyzer = {},
+  rust_analyzer = {
+    ['rust-analyzer'] = {
+      checkOnSave = {
+        -- extraArgs = { "--target-dir", "/home/ellado/rust-analyzer-check"}
+      }
+    }
+  },
+  -- jdtls = {
+  --   root_dir = '/home/ellado/code_zl/',
+  --   cmd = {
+  --     'javfafasa',
+  --     '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+  --     '-Dosgi.bundles.defaultStartLevel=4',
+  --     '-Declipse.product=org.eclipse.jdt.ls.core.product',
+  --     '-Dlog.protocol=true',
+  --     '-Dlog.level=ALL',
+  --     '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005',
+  --     '-Xmx1g',
+  --     '--add-modules=ALL-SYSTEM',
+  --     '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+  --     '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+  --     '-jar', '/home/ellado/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_1.6.700.v20231214-2017.jar',
+  --     '-configuration', '/home/ellado/.local/share/nvim/mason/packages/jdtls/config_linux',
+  --     '-data', workspace_dir
+  --   },
+  -- },
+  quick_lint_js = {},
 
   lua_ls = {
     Lua = {
@@ -531,3 +603,4 @@ cmp.setup {
   },
 }
 
+-- vim.lsp.set_log_level("trace")
